@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>org.example.platform_sync</id>
+    <name>Platform Sync</name>
+    <vendor email="alfian@dicoding.com" url="http://www.dicoding.com">Dicoding</vendor>
+
+    <description>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pellentesque, mauris non efficitur eleifend, justo augue imperdiet odio, sit amet rutrum mi ligula quis enim. </description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <applicationListeners>
+        <listener class="com.platfom.sync.FilesDetectionsListener"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+    </applicationListeners>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
