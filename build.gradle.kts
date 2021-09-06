@@ -1,22 +1,20 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-// compile bytecode to java 8 (default is java 6)
-
 plugins {
     id("org.jetbrains.intellij") version "0.7.2"
     java
     kotlin("jvm") version "1.4.32"
 }
-group = "org.example"
-
-version = "1.0-SNAPSHOT"
+group = "platform.plugin"
+version = "0.3.1"
 
 repositories {
     mavenCentral()
 }
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.squareup.okhttp3:okhttp:3.9.0")
+    implementation ("org.slf4j:slf4j-simple:1.7.21")
+    implementation ("org.java-websocket:Java-WebSocket:1.5.1")
     testImplementation("junit", "junit", "4.12")
 }
 
@@ -28,8 +26,23 @@ tasks.withType<KotlinCompile> {
 intellij {
     version = "2020.1"
 }
+
 tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+    sinceBuild("200.*")
+    untilBuild("212.*")
     changeNotes("""
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>""")
+      <strong>0.3.1</strong>
+      <ul>
+        <li>Added support to IntelliJ latest build version 212.* </li>
+      </ul>
+      <strong>0.2.1</strong>
+      <ul>
+        <li>Fix ghost line selection</li>
+        <li>Fix fail split path on Windows Machine</li>
+        <li>Support Android Studio 4.2</li>
+      </ul>
+      <strong>0.0.1</strong>
+      <ul>
+        <li>Initial preview release</li>
+      </ul>""")
 }
