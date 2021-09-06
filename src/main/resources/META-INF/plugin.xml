@@ -3,7 +3,7 @@
     <name>Platform Sync</name>
     <vendor email="alfian@dicoding.com" url="http://www.dicoding.com">Dicoding</vendor>
 
-    <description>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pellentesque, mauris non efficitur eleifend, justo augue imperdiet odio, sit amet rutrum mi ligula quis enim. </description>
+    <description>IntelliJ IDE plugin to sync opened file with Dicoding Review Platform </description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
