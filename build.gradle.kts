@@ -17,5 +17,5 @@ dependencies {
 }
 
 intellij {
-    version = "2024.1.2"
+    version = "2023.3.1"
 }
