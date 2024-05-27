@@ -1,6 +1,5 @@
 package com.platfom.sync
 
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseListener
@@ -13,7 +12,7 @@ import org.java_websocket.handshake.ServerHandshake
 import java.io.File
 import java.net.URI
 
-class FilesDetectionsListener : FileEditorManagerListener, Disposable{
+class FilesDetectionsListener : FileEditorManagerListener {
     private val socks = WebSocks(URI("ws://localhost:8123/platform"))
     private val editorEventMulticasts = EditorFactory.getInstance().eventMulticaster
     private var recentLine = -1
@@ -53,27 +52,21 @@ class FilesDetectionsListener : FileEditorManagerListener, Disposable{
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
         super.fileOpened(source, file)
         process(source, file)
-
-        editorEventMulticasts.addEditorMouseListener(mouseEditorObserver, this)
     }
 
     private fun process(source: FileEditorManager, file: VirtualFile) {
-        val baseProjectPath = source.project.basePath?.split("[\\/\\\\]".toRegex())?.last() ?: File.separator
+        val baseProjectPath = source.project.basePath?.split("[/\\\\]".toRegex())?.last() ?: File.separator
         val fullPath = file.path
         val projectLocation = fullPath.split(baseProjectPath)[0]
         val filePath = fullPath.replace(projectLocation, "")
 
         if (socks.isOpen) {
-            val newPath = filePath.replace("[\\/\\\\]".toRegex(), "::")
+            val newPath = filePath.replace("[/\\\\]".toRegex(), "::")
             if (newPath != recentPath) {
                 recentPath = newPath
                 socks.send("path===${recentPath}")
             }
         }
-    }
-
-    override fun dispose() {
-        editorEventMulticasts.removeEditorMouseListener(mouseEditorObserver)
     }
 
     class WebSocks(uri: URI) : WebSocketClient(uri) {
