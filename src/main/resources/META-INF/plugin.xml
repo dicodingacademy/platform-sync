@@ -3,10 +3,7 @@
     <name>Platform Sync</name>
     <vendor email="alfian@dicoding.com" url="http://www.dicoding.com">Dicoding</vendor>
 
-    <description>IntelliJ IDE plugin to sync opened file with Dicoding Review Platform </description>
-
-    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
+    <description>IntelliJ IDE plugin to sync opened file with Dicoding Review Platform</description>
     <depends>com.intellij.modules.platform</depends>
 
     <applicationListeners>
@@ -14,11 +11,49 @@
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-    </extensions>
+    <extensions defaultExtensionNs="com.intellij" />
+    <idea-version since-build="200.*" until-build="241.*"/>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
+    <change-notes><![CDATA[
+        <strong>0.5.0</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 241.* </li>
+            <li>Added support to Android Studio Jellyfish</li>
+        </ul>
+        <strong>0.4.4</strong>
+        <strong>0.4.5</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 233.* </li>
+            <li>Added support to Android Studio Iguana</li>
+        </ul>
+        <strong>0.4.4</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 231.* </li>
+            <li>Added support to Android Studio Giraffe</li>
+        </ul>
+        <strong>0.4.3</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 222.* </li>
+            <li>Added support to Android Studio Dolphin</li>
+        </ul>
+        <strong>0.4.1</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 222.* </li>
+            <li>Added support to Android Studio Dolphin</li>
+        </ul>
+        <strong>0.3.1</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 212.* </li>
+        </ul>
+        <strong>0.2.1</strong>
+        <ul>
+            <li>Fix ghost line selection</li>
+            <li>Fix fail split path on Windows Machine</li>
+            <li>Support Android Studio 4.2</li>
+        </ul>
+        <strong>0.0.1</strong>
+        <ul>
+            <li>Initial preview release</li>
+        </ul>]]>
+    </change-notes>
 </idea-plugin>
