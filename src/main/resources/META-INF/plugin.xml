@@ -12,7 +12,8 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij" />
-    <idea-version since-build="200.*" until-build="241.*"/>
+
+    <idea-version since-build="200.*" until-build="233.*"/>
 
     <change-notes><![CDATA[
         <strong>0.5.0</strong>
