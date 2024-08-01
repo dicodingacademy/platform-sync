@@ -51,6 +51,7 @@ class FilesDetectionsListener : FileEditorManagerListener {
 
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
         super.fileOpened(source, file)
+        editorEventMulticasts.addEditorMouseListener(mouseEditorObserver)
         process(source, file)
     }
 
