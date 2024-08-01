@@ -13,9 +13,20 @@
 
     <extensions defaultExtensionNs="com.intellij" />
 
-    <idea-version since-build="200.*" until-build="233.*"/>
-
     <change-notes><![CDATA[
+        <strong>0.5.2-patch3</strong>
+        <ul>
+            <li>Fix platform support issue for version up to 242.* </li>
+        </ul>
+        <strong>0.5.2-patch2</strong>
+        <ul>
+            <li>Fix platform support 242.* </li>
+        </ul>
+        <strong>0.5.0-patch1</strong>
+        <ul>
+            <li>Added support to IntelliJ latest build version 241.* </li>
+            <li>Added support to Android Studio Jellyfish</li>
+        </ul>
         <strong>0.5.0</strong>
         <ul>
             <li>Added support to IntelliJ latest build version 241.* </li>
