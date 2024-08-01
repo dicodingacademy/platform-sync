@@ -4,11 +4,19 @@ plugins {
     kotlin("jvm") version "1.9.20"
 }
 group = "platform.plugin"
-version = "0.5.0"
+version = "0.5.2-patch3"
 
 repositories {
     mavenCentral()
 }
+
+tasks {
+    patchPluginXml {
+        sinceBuild.set("200")
+        untilBuild.set("241.*")
+    }
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.20")
     implementation ("org.slf4j:slf4j-simple:1.7.32")
