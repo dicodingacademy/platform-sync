@@ -19,6 +19,7 @@
         <group id="com.platform.sync.PlatformSyncGroup"
                class="com.intellij.openapi.actionSystem.DefaultActionGroup"
                text="Platform Sync"
+               icon="com.intellij.icons.ExpUiIcons.Toolwindow.SettingSync"
                popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
 
