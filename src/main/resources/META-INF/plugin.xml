@@ -14,6 +14,10 @@
     <extensions defaultExtensionNs="com.intellij" />
 
     <change-notes><![CDATA[
+        <strong>0.5.5</strong>
+        <ul>
+            <li>Fix platform support issue for version up to 243.* </li>
+        </ul>
         <strong>0.5.2-patch3</strong>
         <ul>
             <li>Fix platform support issue for version up to 242.* </li>
