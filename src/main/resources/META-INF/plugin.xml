@@ -16,13 +16,22 @@
     </extensions>
 
     <actions>
-        <group id="com.platform.sync.PlatformSyncGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" text="Platform Sync" popup="false">
+        <group id="com.platform.sync.PlatformSyncGroup"
+               class="com.intellij.openapi.actionSystem.DefaultActionGroup"
+               text="Platform Sync"
+               popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
 
             <action id="com.platfom.sync.action.ReviewerUsernameInputAction"
                     class="com.platfom.sync.action.ReviewerUsernameInputAction"
                     text="Input Reviwer Username"
                     description="Open a dialog to input username">
+            </action>
+
+            <action id="com.platfom.sync.action.PlatformSyncStatusAction"
+                    class="com.platfom.sync.action.PlatformSyncStatusAction"
+                    text="Platform Sync Status"
+                    description="Status of platform sync">
             </action>
         </group>
     </actions>

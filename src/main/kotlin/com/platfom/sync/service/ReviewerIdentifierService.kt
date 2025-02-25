@@ -8,7 +8,7 @@ import com.intellij.openapi.components.service
 @State(name = "PlatformSyncService", storages = [Storage("PlatformSyncService.xml")])
 class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> {
 
-    data class State(var reviewerUserName: String? = null, var platformSyncStatus: String = PlatformSyncStatus.FAILED_TO_CONNECT.status)
+    data class State(var reviewerUserName: String? = null, var platformSyncStatus: PlatformSyncStatus = PlatformSyncStatus.FAILED_TO_CONNECT)
 
     private var state = State()
 
@@ -24,18 +24,19 @@ class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> 
 
     fun getReviewerUsername(): String? = state.reviewerUserName
 
-    fun savePlatformSyncStatus(status: String) {
+    fun savePlatformSyncStatus(status: PlatformSyncStatus) {
         state.platformSyncStatus = status
     }
 
-    fun setPlatformSyncStatus(): String = state.platformSyncStatus
+    fun getPlatformSyncStatus(): PlatformSyncStatus = state.platformSyncStatus
 
     companion object {
         fun getInstance(): PlatformSyncService = service()
     }
 }
 
-enum class PlatformSyncStatus(val status: String) {
+enum class PlatformSyncStatus(val description: String) {
     CONNECTED("Connected"),
+    DISCONNECTED("Disconnected"),
     FAILED_TO_CONNECT("Failed to Connect")
 }

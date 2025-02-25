@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.platfom.sync.service.PlatformSyncService
+import com.platfom.sync.service.PlatformSyncStatus
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.io.File
@@ -15,7 +16,7 @@ import java.net.URI
 
 class FilesDetectionsListener : FileEditorManagerListener {
     private val platformSyncService = PlatformSyncService.getInstance();
-    private val socks = WebSocks(URI("ws://localhost:8123/platform"))
+    private val socks = WebSocks(platformSyncService, URI("ws://localhost:8123/platform"))
     private val editorEventMulticasts = EditorFactory.getInstance().eventMulticaster
     private var recentLine = -1
     private var recentPath = ""
@@ -72,8 +73,9 @@ class FilesDetectionsListener : FileEditorManagerListener {
         }
     }
 
-    class WebSocks(uri: URI) : WebSocketClient(uri) {
+    class WebSocks(private val platformSyncService: PlatformSyncService, uri: URI) : WebSocketClient(uri) {
         override fun onOpen(handshakedata: ServerHandshake?) {
+            platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.CONNECTED)
             println("connected, ready to observe")
         }
 
@@ -82,10 +84,12 @@ class FilesDetectionsListener : FileEditorManagerListener {
         }
 
         override fun onClose(code: Int, reason: String?, remote: Boolean) {
+            platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.DISCONNECTED)
             println("connection close")
         }
 
         override fun onError(ex: Exception?) {
+            platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.FAILED_TO_CONNECT)
             println("connection error")
         }
     }
