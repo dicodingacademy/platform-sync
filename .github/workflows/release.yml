@@ -41,3 +41,13 @@ jobs:
           name: "Release ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
           body: "New IntelliJ Plugin Release: ${{ github.ref_name }}"
+
+      - uses: shallwefootball/s3-upload-action@master
+        name: Upload artefact to S3
+        id: S3
+        with:
+          aws_key_id: ${{ secrets.STORAGE_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET}}
+          aws_bucket: ${{ secrets.TOOLS_BUCKET }}
+          source_dir: ${{ env.PLUGIN_FILE }}
+
