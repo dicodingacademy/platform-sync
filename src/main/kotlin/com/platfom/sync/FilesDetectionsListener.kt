@@ -7,12 +7,14 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.vfs.VirtualFile
+import com.platfom.sync.service.PlatformSyncService
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.io.File
 import java.net.URI
 
 class FilesDetectionsListener : FileEditorManagerListener {
+    private val platformSyncService = PlatformSyncService.getInstance();
     private val socks = WebSocks(URI("ws://localhost:8123/platform"))
     private val editorEventMulticasts = EditorFactory.getInstance().eventMulticaster
     private var recentLine = -1
@@ -31,7 +33,7 @@ class FilesDetectionsListener : FileEditorManagerListener {
             if (socks.isOpen) {
                 if (newLinePosition != recentLine) {
                     recentLine = newLinePosition
-                    socks.send("line===${recentLine}")
+                    socks.send("reviewerUsername===${platformSyncService.getReviewerUsername()};line===${recentLine}")
                 }
             }
         }
@@ -65,7 +67,7 @@ class FilesDetectionsListener : FileEditorManagerListener {
             val newPath = filePath.replace("[/\\\\]".toRegex(), "::")
             if (newPath != recentPath) {
                 recentPath = newPath
-                socks.send("path===${recentPath}")
+                socks.send("reviewerUsername===${platformSyncService.getReviewerUsername()};path===${recentPath}")
             }
         }
     }

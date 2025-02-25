@@ -15,6 +15,18 @@
         <applicationService serviceImplementation="com.platfom.sync.service.PlatformSyncService"/>
     </extensions>
 
+    <actions>
+        <group id="com.platform.sync.PlatformSyncGroup" class="com.intellij.openapi.actionSystem.DefaultActionGroup" text="Platform Sync" popup="false">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+
+            <action id="com.platfom.sync.action.ReviewerUsernameInputAction"
+                    class="com.platfom.sync.action.ReviewerUsernameInputAction"
+                    text="Input Reviwer Username"
+                    description="Open a dialog to input username">
+            </action>
+        </group>
+    </actions>
+
     <change-notes><![CDATA[
         <strong>0.5.5</strong>
         <ul>
