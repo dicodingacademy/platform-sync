@@ -11,7 +11,9 @@
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 
-    <extensions defaultExtensionNs="com.intellij" />
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.platfom.sync.service.PlatformSyncService"/>
+    </extensions>
 
     <change-notes><![CDATA[
         <strong>0.5.5</strong>
