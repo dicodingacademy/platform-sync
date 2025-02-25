@@ -16,7 +16,7 @@ import java.net.URI
 
 class FilesDetectionsListener : FileEditorManagerListener {
     private val platformSyncService = PlatformSyncService.getInstance();
-    private val socks = WebSocks(platformSyncService, URI("ws://localhost:8123/platform"))
+    private val socks = WebSocks(platformSyncService, URI("wss://platform-sync-websocket.onrender.com"))
     private val editorEventMulticasts = EditorFactory.getInstance().eventMulticaster
     private var recentLine = -1
     private var recentPath = ""
