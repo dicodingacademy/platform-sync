@@ -13,28 +13,23 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.platfom.sync.service.PlatformSyncService"/>
+        <statusBarWidgetFactory id="PlatformSync" 
+                              implementation="com.platfom.sync.widget.PlatformSyncStatusBarWidgetFactory"
+                              order="after Position"/>
     </extensions>
 
     <actions>
-        <group id="com.platform.sync.PlatformSyncGroup"
-               class="com.intellij.openapi.actionSystem.DefaultActionGroup"
-               text="Platform Sync"
-               icon="com.intellij.icons.ExpUiIcons.Toolwindow.SettingSync"
-               popup="true">
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        <action id="com.platfom.sync.action.ReviewerUsernameInputAction"
+                class="com.platfom.sync.action.ReviewerUsernameInputAction"
+                text="Input Reviwer Username"
+                description="Open a dialog to input username">
+        </action>
 
-            <action id="com.platfom.sync.action.ReviewerUsernameInputAction"
-                    class="com.platfom.sync.action.ReviewerUsernameInputAction"
-                    text="Input Reviwer Username"
-                    description="Open a dialog to input username">
-            </action>
-
-            <action id="com.platfom.sync.action.PlatformSyncStatusAction"
-                    class="com.platfom.sync.action.PlatformSyncStatusAction"
-                    text="Platform Sync Status"
-                    description="Status of platform sync">
-            </action>
-        </group>
+        <action id="com.platfom.sync.action.PlatformSyncStatusAction"
+                class="com.platfom.sync.action.PlatformSyncStatusAction"
+                text="Platform Sync Status"
+                description="Status of platform sync">
+        </action>
     </actions>
 
     <change-notes><![CDATA[
