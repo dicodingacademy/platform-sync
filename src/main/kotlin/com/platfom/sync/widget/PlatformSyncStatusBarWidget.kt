@@ -33,9 +33,7 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
 
     override fun getPopup(): ListPopup {
         val isConnected = webSocketService.isConnected()
-
         val menuItems = mutableListOf(MenuItem("Set Username", true))
-
         menuItems.add(MenuItem(if (isConnected) "Disconnect" else "Reconnect", true))
 
         val step = object : BaseListPopupStep<MenuItem>("Platform Sync Actions", menuItems) {
