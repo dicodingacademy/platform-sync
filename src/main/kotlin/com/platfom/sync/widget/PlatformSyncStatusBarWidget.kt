@@ -13,22 +13,21 @@ import com.platfom.sync.service.WebSocketService
 
 class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project), StatusBarWidget.MultipleTextValuesPresentation {
     private val webSocketService = WebSocketService.getInstance()
-    
+
     override fun getTooltipText(): String = "Platform Sync Status"
 
     override fun getSelectedValue(): String {
         val service = PlatformSyncService.getInstance()
         val username = service.getReviewerUsername() ?: "Not Set"
-        val status = service.getPlatformSyncStatus()
         val connection = if (webSocketService.isConnected()) "Connected" else "Disconnected"
-        return "Platform Sync | User: $username | Status: $connection"
+        return "Platform Sync ($username): $connection"
     }
 
     override fun getPopup(): ListPopup? {
         val isConnected = webSocketService.isConnected()
         val items = mutableListOf("Set Username")
         items.add(if (isConnected) "Disconnect" else "Reconnect")
-        
+
         val step = object : BaseListPopupStep<String>("Platform Sync Actions", items) {
             override fun onChosen(selectedValue: String?, finalChoice: Boolean): PopupStep<*>? {
                 when (selectedValue) {
@@ -57,11 +56,9 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
 
     override fun install(statusBar: com.intellij.openapi.wm.StatusBar) {
         super.install(statusBar)
-        // Update when username or status changes
         PlatformSyncService.getInstance().addChangeListener {
             statusBar.updateWidget(ID())
         }
-        // Update when WebSocket connection state changes
         WebSocketService.getInstance().addChangeListener {
             statusBar.updateWidget(ID())
         }
@@ -69,7 +66,6 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
 
     override fun dispose() {
         super.dispose()
-        // Clean up listeners
         PlatformSyncService.getInstance().removeChangeListener { statusBar?.updateWidget(ID()) }
         WebSocketService.getInstance().removeChangeListener { statusBar?.updateWidget(ID()) }
     }
