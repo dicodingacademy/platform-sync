@@ -16,6 +16,9 @@
         <statusBarWidgetFactory id="PlatformSync" 
                               implementation="com.platfom.sync.widget.PlatformSyncStatusBarWidgetFactory"
                               order="after Position"/>
+        <notificationGroup id="Platform Sync Notification"
+                         displayType="BALLOON"
+                         key="platform.sync.notification"/>
     </extensions>
 
     <actions>

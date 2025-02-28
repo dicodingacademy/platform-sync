@@ -1,5 +1,7 @@
 package com.platfom.sync.service
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import org.java_websocket.client.WebSocketClient
@@ -12,12 +14,26 @@ class WebSocketService {
     private val platformSyncService = PlatformSyncService.getInstance()
     private val listeners = mutableListOf<() -> Unit>()
     
-    fun connect() {
+    fun connect(): Boolean {
+        val username = platformSyncService.getReviewerUsername()
+        if (username.isNullOrEmpty()) {
+            showNotification("Username not set", "Please set your reviewer username before connecting", NotificationType.WARNING)
+            return false
+        }
+        
         disconnect()
         webSocketClient = WebSocks(platformSyncService, URI("wss://platform-sync-websocket.onrender.com")).apply {
             connect()
         }
         notifyListeners()
+        return true
+    }
+    
+    private fun showNotification(title: String, content: String, type: NotificationType) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("Platform Sync Notification")
+            .createNotification(title, content, type)
+            .notify(null)
     }
     
     fun disconnect() {

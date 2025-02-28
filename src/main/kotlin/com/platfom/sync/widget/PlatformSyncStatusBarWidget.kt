@@ -1,5 +1,6 @@
 package com.platfom.sync.widget
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.ListPopup
 import com.intellij.openapi.ui.popup.PopupStep
@@ -10,30 +11,32 @@ import com.intellij.ui.popup.list.ListPopupImpl
 import com.platfom.sync.action.ReviewerUsernameInputAction
 import com.platfom.sync.service.PlatformSyncService
 import com.platfom.sync.service.WebSocketService
-import com.intellij.openapi.application.ApplicationManager
 
-class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project), StatusBarWidget.MultipleTextValuesPresentation {
+class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project),
+    StatusBarWidget.MultipleTextValuesPresentation {
     private val webSocketService = WebSocketService.getInstance()
     private var currentPopup: ListPopupImpl? = null
 
-    override fun getTooltipText(): String = "Platform Sync Status"
+    override fun getTooltipText(): String {
+        val service = PlatformSyncService.getInstance()
+        val username = service.getReviewerUsername() ?: "Not Set"
+        val status = service.getPlatformSyncStatus()
+        return "Platform Sync | Reviewer: $username | Status: ${status.description}"
+    }
 
     override fun getSelectedValue(): String {
         val service = PlatformSyncService.getInstance()
-        val username = service.getReviewerUsername() ?: "Not Set"
-        val connection = if (webSocketService.isConnected()) "Connected" else "Disconnected"
-        return "Platform Sync ($username): $connection"
+        val username = service.getReviewerUsername()?.let { "($it)" } ?: "(Not Set)"
+        val status = service.getPlatformSyncStatus()
+        return "Platform Sync $username | ${status.description}"
     }
 
     override fun getPopup(): ListPopup {
         val isConnected = webSocketService.isConnected()
-        val service = PlatformSyncService.getInstance()
-        val status = service.getPlatformSyncStatus()
 
-        val menuItems = listOf(
-            MenuItem("Set Username", true),
-            MenuItem(if (isConnected) "Disconnect" else "Reconnect", true),
-        )
+        val menuItems = mutableListOf(MenuItem("Set Username", true))
+
+        menuItems.add(MenuItem(if (isConnected) "Disconnect" else "Reconnect", true))
 
         val step = object : BaseListPopupStep<MenuItem>("Platform Sync Actions", menuItems) {
             override fun onChosen(selectedValue: MenuItem?, finalChoice: Boolean): PopupStep<*>? {
@@ -51,6 +54,7 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
                                 )
                             )
                         }
+
                         "Disconnect" -> webSocketService.disconnect()
                         "Reconnect" -> webSocketService.connect()
                     }
