@@ -8,13 +8,13 @@ import java.net.URI
 
 @Service
 class WebSocketService {
-    private val listeners = mutableListOf<() -> Unit>()
     private var webSocketClient: WebSocks? = null
     private val platformSyncService = PlatformSyncService.getInstance()
+    private val listeners = mutableListOf<() -> Unit>()
     
     fun connect() {
         disconnect()
-        webSocketClient = WebSocks(platformSyncService) { notifyListeners() }.apply {
+        webSocketClient = WebSocks(platformSyncService, URI("wss://platform-sync-websocket.onrender.com")).apply {
             connect()
         }
         notifyListeners()
@@ -46,14 +46,11 @@ class WebSocketService {
         listeners.forEach { it() }
     }
 
-    private class WebSocks(
-        private val platformSyncService: PlatformSyncService,
-        private val onStateChange: () -> Unit
-    ) : WebSocketClient(URI("wss://platform-sync-websocket.onrender.com")) {
+    private inner class WebSocks(private val platformSyncService: PlatformSyncService, uri: URI) : WebSocketClient(uri) {
         override fun onOpen(handshakedata: ServerHandshake?) {
             platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.CONNECTED)
-            onStateChange()
             println("connected, ready to observe")
+            notifyListeners()
         }
 
         override fun onMessage(message: String?) {
@@ -62,14 +59,14 @@ class WebSocketService {
 
         override fun onClose(code: Int, reason: String?, remote: Boolean) {
             platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.DISCONNECTED)
-            onStateChange()
             println("connection close")
+            notifyListeners()
         }
 
         override fun onError(ex: Exception?) {
             platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.FAILED_TO_CONNECT)
-            onStateChange()
             println("connection error")
+            notifyListeners()
         }
     }
 
