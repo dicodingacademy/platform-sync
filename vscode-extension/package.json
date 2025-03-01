@@ -15,13 +15,28 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:platform-sync.toggleConnection"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "platform-sync.start",
         "title": "Start Platform Sync"
+      },
+      {
+        "command": "platform-sync.setUsername",
+        "title": "Platform Sync: Set Reviewer Username"
+      },
+      {
+        "command": "platform-sync.toggleConnection",
+        "title": "Platform Sync: Toggle Connection"
+      },
+      {
+        "command": "platform-sync.showStatusBar",
+        "title": "Platform Sync: Show Status Bar"
       }
     ]
   },

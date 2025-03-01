@@ -88,6 +88,7 @@ export class VSCodeWebSocketService implements WebSocketService {
 
         this.ws.on('error', (error) => {
             console.error('WebSocket error:', error);
+            this.emit('error', error);
             this.handleReconnect();
         });
     }

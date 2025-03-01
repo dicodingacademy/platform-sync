@@ -8,7 +8,7 @@ let username: string | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
     // Initialize status bar item
-    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 500);
     statusBarItem.text = "$(sync) Platform Sync";
     statusBarItem.command = 'platform-sync.toggleConnection';
     statusBarItem.show();
