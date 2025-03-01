@@ -27,9 +27,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
-    "build": "npm run build:shared && npm run build:server && webpack --mode production",
-    "build:shared": "cd shared && tsc",
-    "build:server": "cd server && tsc",
+    "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
     "lint": "eslint src/**/*.ts",
     "package": "vsce package",
