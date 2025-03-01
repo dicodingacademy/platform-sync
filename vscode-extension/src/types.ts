@@ -1,11 +1,15 @@
+import { WebSocket } from 'ws';
+
+export interface SyncMessageData {
+  username: string;
+  filePath: string;
+  line: number;
+}
+
 export interface SyncMessage {
-  type: 'PATH_CHANGE' | 'LINE_CHANGE';
-  reviewerUsername: string;
-  data: {
-    path?: string;
-    line?: number;
-  };
-  timestamp: number;
+  type: 'file_change' | 'cursor_change';
+  data: SyncMessageData;
+  timestamp: string;
 }
 
 export enum ConnectionStatus {
@@ -16,28 +20,28 @@ export enum ConnectionStatus {
 
 export interface ConnectionConfig {
   url: string;
-  reconnectAttempts?: number;
-  reconnectInterval?: number;
+  reconnectInterval: number;
+  maxReconnectAttempts: number;
 }
 
 export interface WebSocketService {
-  connect(config: ConnectionConfig): Promise<boolean>;
+  connect(): void;
   disconnect(): void;
-  sendMessage(message: SyncMessage): void;
+  send(message: SyncMessage): void;
   isConnected(): boolean;
-  addChangeListener(listener: () => void): void;
-  removeChangeListener(listener: () => void): void;
+  on(event: string, callback: (data: any) => void): void;
 }
 
 export interface StorageService {
-  get<T>(key: string): Promise<T | undefined>;
-  set<T>(key: string, value: T): Promise<void>;
-  delete(key: string): Promise<void>;
+  get(key: string): Promise<string | undefined>;
+  set(key: string, value: string): Promise<void>;
 }
 
 export interface Logger {
-  debug(message: string, ...args: any[]): void;
-  info(message: string, ...args: any[]): void;
-  warn(message: string, ...args: any[]): void;
-  error(message: string, error?: Error, ...args: any[]): void;
+  info(message: string): void;
+  error(message: string, error?: Error): void;
+  warn(message: string): void;
+  debug(message: string): void;
 }
+
+export type { WebSocket };

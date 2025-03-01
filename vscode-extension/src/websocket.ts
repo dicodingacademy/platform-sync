@@ -1,123 +1,108 @@
-import WebSocket from 'ws';
-import { WebSocketService, ConnectionConfig, ConnectionStatus, SyncMessage, Logger } from './types';
+import { WebSocket } from 'ws';
+import { ConnectionConfig, SyncMessage, WebSocketService } from './types';
 
-export abstract class BaseWebSocketService implements WebSocketService {
-  protected ws: WebSocket | null = null;
-  protected listeners: Array<() => void> = [];
-  protected config: ConnectionConfig | null = null;
-  protected reconnectTimeout: NodeJS.Timeout | null = null;
-  protected reconnectAttempts = 0;
-  protected logger: Logger;
+export class VSCodeWebSocketService implements WebSocketService {
+    private ws: WebSocket | null = null;
+    private connected = false;
+    private reconnectAttempts = 0;
+    private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
 
-  constructor(logger: Logger) {
-    this.logger = logger;
-  }
+    constructor(private config: ConnectionConfig) {}
 
-  async connect(config: ConnectionConfig): Promise<boolean> {
-    this.config = config;
-    return this.establishConnection();
-  }
+    connect(): void {
+        if (this.connected) {
+            return;
+        }
 
-  disconnect(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-      this.clearReconnectTimeout();
-      this.onConnectionChange(ConnectionStatus.DISCONNECTED);
-    }
-  }
-
-  sendMessage(message: SyncMessage): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      try {
-        this.ws.send(JSON.stringify({
-          ...message,
-          timestamp: Date.now()
-        }));
-      } catch (error) {
-        this.logger.error('Failed to send message', error as Error);
-      }
-    }
-  }
-
-  isConnected(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN;
-  }
-
-  addChangeListener(listener: () => void): void {
-    this.listeners.push(listener);
-  }
-
-  removeChangeListener(listener: () => void): void {
-    const index = this.listeners.indexOf(listener);
-    if (index > -1) {
-      this.listeners.splice(index, 1);
-    }
-  }
-
-  protected notifyListeners(): void {
-    this.listeners.forEach(listener => {
-      try {
-        listener();
-      } catch (error) {
-        this.logger.error('Error in listener', error as Error);
-      }
-    });
-  }
-
-  protected abstract onConnectionChange(status: ConnectionStatus): void;
-
-  private async establishConnection(): Promise<boolean> {
-    if (!this.config) {
-      throw new Error('Connection config not set');
+        try {
+            this.ws = new WebSocket(this.config.url);
+            this.setupWebSocketHandlers();
+        } catch (error) {
+            console.error('Failed to create WebSocket connection:', error);
+            this.handleReconnect();
+        }
     }
 
-    try {
-      this.ws = new WebSocket(this.config.url);
-
-      this.ws.on('open', () => {
-        this.logger.info('WebSocket connected');
-        this.reconnectAttempts = 0;
-        this.onConnectionChange(ConnectionStatus.CONNECTED);
-      });
-
-      this.ws.on('close', () => {
-        this.logger.info('WebSocket closed');
-        this.onConnectionChange(ConnectionStatus.DISCONNECTED);
-        this.attemptReconnect();
-      });
-
-      this.ws.on('error', (error) => {
-        this.logger.error('WebSocket error', error);
-        this.onConnectionChange(ConnectionStatus.FAILED_TO_CONNECT);
-        this.attemptReconnect();
-      });
-
-      return true;
-    } catch (error) {
-      this.logger.error('Failed to establish WebSocket connection', error as Error);
-      this.onConnectionChange(ConnectionStatus.FAILED_TO_CONNECT);
-      return false;
-    }
-  }
-
-  private attemptReconnect(): void {
-    if (!this.config?.reconnectAttempts || this.reconnectAttempts >= this.config.reconnectAttempts) {
-      return;
+    disconnect(): void {
+        if (this.ws) {
+            this.ws.close();
+            this.ws = null;
+            this.connected = false;
+            this.emit('disconnected');
+        }
     }
 
-    this.clearReconnectTimeout();
-    this.reconnectTimeout = setTimeout(() => {
-      this.reconnectAttempts++;
-      this.logger.info(`Attempting to reconnect (${this.reconnectAttempts}/${this.config?.reconnectAttempts})`);
-      this.establishConnection();
-    }, this.config.reconnectInterval || 5000);
-  }
-
-  private clearReconnectTimeout(): void {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
+    send(message: SyncMessage): void {
+        if (this.ws && this.connected) {
+            try {
+                this.ws.send(JSON.stringify(message));
+            } catch (error) {
+                console.error('Failed to send message:', error);
+            }
+        }
     }
-  }
+
+    isConnected(): boolean {
+        return this.connected;
+    }
+
+    on(event: string, callback: (data: any) => void): void {
+        if (!this.eventListeners[event]) {
+            this.eventListeners[event] = [];
+        }
+        this.eventListeners[event].push(callback);
+    }
+
+    private emit(event: string, data?: any): void {
+        const listeners = this.eventListeners[event];
+        if (listeners) {
+            listeners.forEach(callback => callback(data));
+        }
+    }
+
+    private setupWebSocketHandlers(): void {
+        if (!this.ws) {
+            return;
+        }
+
+        this.ws.on('open', () => {
+            this.connected = true;
+            this.reconnectAttempts = 0;
+            this.emit('connected');
+        });
+
+        this.ws.on('message', (data: Buffer) => {
+            try {
+                const message = JSON.parse(data.toString());
+                this.emit('message', message);
+            } catch (error) {
+                console.error('Failed to parse message:', error);
+            }
+        });
+
+        this.ws.on('close', () => {
+            this.connected = false;
+            this.emit('disconnected');
+            this.handleReconnect();
+        });
+
+        this.ws.on('error', (error) => {
+            console.error('WebSocket error:', error);
+            this.handleReconnect();
+        });
+    }
+
+    private handleReconnect(): void {
+        if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+            console.error('Max reconnection attempts reached');
+            return;
+        }
+
+        this.reconnectAttempts++;
+        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
+
+        setTimeout(() => {
+            this.connect();
+        }, this.config.reconnectInterval);
+    }
 }
