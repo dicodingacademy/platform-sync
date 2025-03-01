@@ -1,56 +1,54 @@
 {
   "name": "platform-sync-vscode",
   "displayName": "Platform Sync",
-  "description": "VS Code extension to sync opened file with Dicoding Review Platform",
+  "description": "Cross-platform code review synchronization tool for VS Code and IntelliJ IDEA",
   "version": "0.0.1",
+  "publisher": "dicodingacademy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicodingacademy/platform-sync.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "platform-sync.setUsername",
-        "title": "Platform Sync: Set Reviewer Username"
-      },
-      {
-        "command": "platform-sync.toggleConnection",
-        "title": "Platform Sync: Toggle Connection"
+        "command": "platform-sync.start",
+        "title": "Start Platform Sync"
       }
     ]
   },
   "scripts": {
     "vscode:prepublish": "npm run build",
     "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
     "dev": "webpack --mode development --watch",
     "lint": "eslint src/**/*.ts",
     "package": "vsce package",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "runIde": "gradle runIde"
   },
   "dependencies": {
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19",
+    "@types/node": "^16.18.86",
     "@types/vscode": "^1.85.0",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.56.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
     "vsce": "^2.15.0",
-    "webpack": "^5.90.1",
+    "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
-  },
-  "optionalDependencies": {
-    "bufferutil": "^4.0.9",
-    "utf-8-validate": "^6.0.5"
   }
 }
