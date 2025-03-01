@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
-    "outDir": "./dist",
+    "outDir": "./out",
     "lib": ["ES2022"],
     "sourceMap": true,
     "rootDir": "src",
@@ -14,5 +14,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", ".vscode-test"]
 }
