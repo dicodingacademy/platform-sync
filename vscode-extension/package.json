@@ -1,0 +1,54 @@
+{
+  "name": "platform-sync-vscode",
+  "displayName": "Platform Sync",
+  "description": "VS Code extension to sync opened file with Dicoding Review Platform",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "platform-sync.setUsername",
+        "title": "Platform Sync: Set Reviewer Username"
+      },
+      {
+        "command": "platform-sync.toggleConnection",
+        "title": "Platform Sync: Toggle Connection"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "npm run build:shared && npm run build:server && webpack --mode production",
+    "build:shared": "cd shared && tsc",
+    "build:server": "cd server && tsc",
+    "dev": "webpack --mode development --watch",
+    "lint": "eslint src/**/*.ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "vsce": "^2.15.0",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
