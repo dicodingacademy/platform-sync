@@ -31,8 +31,8 @@
     "watch": "webpack --mode development --watch",
     "dev": "webpack --mode development --watch",
     "lint": "eslint src/**/*.ts",
-    "package": "vsce package",
-    "publish": "vsce publish",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies",
     "runIde": "gradle runIde"
   },
   "dependencies": {
