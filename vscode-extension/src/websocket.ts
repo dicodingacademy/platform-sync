@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import WebSocket from 'ws';
 import { ConnectionConfig, SyncMessage, WebSocketService } from './types';
 
 export class VSCodeWebSocketService implements WebSocketService {
@@ -18,7 +18,6 @@ export class VSCodeWebSocketService implements WebSocketService {
             this.ws = new WebSocket(this.config.url);
             this.setupWebSocketHandlers();
         } catch (error) {
-            console.error('Failed to create WebSocket connection:', error);
             this.handleReconnect();
         }
     }
@@ -35,7 +34,8 @@ export class VSCodeWebSocketService implements WebSocketService {
     send(message: SyncMessage): void {
         if (this.ws && this.connected) {
             try {
-                this.ws.send(JSON.stringify(message));
+                const messageString = JSON.stringify(message);
+                this.ws.send(messageString);
             } catch (error) {
                 console.error('Failed to send message:', error);
             }
@@ -56,7 +56,13 @@ export class VSCodeWebSocketService implements WebSocketService {
     private emit(event: string, data?: any): void {
         const listeners = this.eventListeners[event];
         if (listeners) {
-            listeners.forEach(callback => callback(data));
+            listeners.forEach(callback => {
+                try {
+                    callback(data);
+                } catch (error) {
+                    console.error(`Error in event listener for ${event}:`, error);
+                }
+            });
         }
     }
 
@@ -64,14 +70,14 @@ export class VSCodeWebSocketService implements WebSocketService {
         if (!this.ws) {
             return;
         }
-
+        
         this.ws.on('open', () => {
             this.connected = true;
             this.reconnectAttempts = 0;
             this.emit('connected');
         });
 
-        this.ws.on('message', (data: Buffer) => {
+        this.ws.on('message', (data: WebSocket.Data) => {
             try {
                 const message = JSON.parse(data.toString());
                 this.emit('message', message);
@@ -86,21 +92,17 @@ export class VSCodeWebSocketService implements WebSocketService {
             this.handleReconnect();
         });
 
-        this.ws.on('error', (error) => {
-            console.error('WebSocket error:', error);
+        this.ws.on('error', (error: Error) => {
             this.emit('error', error);
-            this.handleReconnect();
         });
     }
 
     private handleReconnect(): void {
         if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-            console.error('Max reconnection attempts reached');
             return;
         }
 
         this.reconnectAttempts++;
-        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
 
         setTimeout(() => {
             this.connect();

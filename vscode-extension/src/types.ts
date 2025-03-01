@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import WebSocket from 'ws';
 
 export interface SyncMessageData {
   username: string;
@@ -7,8 +7,12 @@ export interface SyncMessageData {
 }
 
 export interface SyncMessage {
-  type: 'file_change' | 'cursor_change';
-  data: SyncMessageData;
+  type: string;
+  data: {
+    username: string;
+    filePath: string;
+    line: number;
+  };
   timestamp: string;
 }
 
@@ -29,7 +33,9 @@ export interface WebSocketService {
   disconnect(): void;
   send(message: SyncMessage): void;
   isConnected(): boolean;
-  on(event: string, callback: (data: any) => void): void;
+  on(event: 'message', callback: (data: SyncMessage) => void): void;
+  on(event: 'connected' | 'disconnected', callback: () => void): void;
+  on(event: 'error', callback: (error: Error) => void): void;
 }
 
 export interface StorageService {
@@ -43,5 +49,3 @@ export interface Logger {
   warn(message: string): void;
   debug(message: string): void;
 }
-
-export type { WebSocket };
