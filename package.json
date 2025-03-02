@@ -11,6 +11,7 @@
     "build:vscode": "npm run build -w vscode-extension",
     "package:vscode": "npm run package -w vscode-extension",
     "dev:vscode": "npm run dev -w vscode-extension",
+    "dev:intellij": "./intellij-plugin/gradlew -p intellij-plugin runIde",
     "lint": "npm run lint -w vscode-extension",
     "clean": "rm -rf intellij-plugin/build vscode-extension/dist vscode-extension/*.vsix"
   },
