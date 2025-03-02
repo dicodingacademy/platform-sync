@@ -6,6 +6,7 @@ export class VSCodeWebSocketService implements WebSocketService {
     private connected = false;
     private reconnectAttempts = 0;
     private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
+    private username: string | null = null;
 
     constructor(private config: ConnectionConfig) {}
 
@@ -18,6 +19,7 @@ export class VSCodeWebSocketService implements WebSocketService {
             this.ws = new WebSocket(this.config.url);
             this.setupWebSocketHandlers();
         } catch (error) {
+            console.error('Failed to create WebSocket connection:', error);
             this.handleReconnect();
         }
     }
@@ -34,7 +36,19 @@ export class VSCodeWebSocketService implements WebSocketService {
     send(message: SyncMessage): void {
         if (this.ws && this.connected) {
             try {
-                const messageString = JSON.stringify(message);
+                // For compatibility with the IntelliJ plugin, we need to format the message as a string
+                // Format: "reviewerUsername===username;key===value"
+                let messageString = '';
+                
+                if (message.type === 'path') {
+                    messageString = `reviewerUsername===${message.data.username};path===${message.data.filePath}`;
+                } else if (message.type === 'line') {
+                    messageString = `reviewerUsername===${message.data.username};line===${message.data.line}`;
+                } else {
+                    // Fallback to JSON for other message types
+                    messageString = JSON.stringify(message);
+                }
+                
                 this.ws.send(messageString);
             } catch (error) {
                 console.error('Failed to send message:', error);
@@ -44,6 +58,10 @@ export class VSCodeWebSocketService implements WebSocketService {
 
     isConnected(): boolean {
         return this.connected;
+    }
+
+    setUsername(username: string): void {
+        this.username = username;
     }
 
     on(event: string, callback: (data: any) => void): void {
@@ -79,7 +97,18 @@ export class VSCodeWebSocketService implements WebSocketService {
 
         this.ws.on('message', (data: WebSocket.Data) => {
             try {
-                const message = JSON.parse(data.toString());
+                // Try to parse as JSON first
+                let message: any;
+                const dataString = data.toString();
+
+                if (dataString.includes('===')) {
+                    // Format: key===value;key2===value2
+                    message = this.parseFormattedMessage(dataString);
+                } else {
+                    // Standard JSON
+                    message = JSON.parse(dataString);
+                }
+
                 this.emit('message', message);
             } catch (error) {
                 console.error('Failed to parse message:', error);
@@ -93,16 +122,37 @@ export class VSCodeWebSocketService implements WebSocketService {
         });
 
         this.ws.on('error', (error: Error) => {
+            console.error('WebSocket error:', error);
             this.emit('error', error);
         });
     }
 
+    /**
+     * Parse message in the format: key===value;key2===value2
+     */
+    private parseFormattedMessage(messageString: string): any {
+        const result: any = {};
+        const parts = messageString.split(';');
+        
+        for (const part of parts) {
+            if (part.includes('===')) {
+                const [key, value] = part.split('===');
+                result[key] = value;
+            }
+        }
+        
+        return result;
+    }
+
     private handleReconnect(): void {
         if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+            console.error('Max reconnection attempts reached');
+            this.emit('error', new Error('Max reconnection attempts reached'));
             return;
         }
 
         this.reconnectAttempts++;
+        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
 
         setTimeout(() => {
             this.connect();
