@@ -28,13 +28,32 @@
       {
         "command": "platform-sync.showInfo",
         "title": "Platform Sync: Show Information"
+      },
+      {
+        "command": "platform-sync.toggleConnection",
+        "title": "Platform Sync: Toggle Connection"
+      },
+      {
+        "command": "platform-sync.showMenu",
+        "title": "Platform Sync: Show Menu"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Platform Sync",
+      "properties": {
+        "platformSync.username": {
+          "type": "string",
+          "default": "",
+          "description": "Reviewer username for platform sync"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
+    "dev": "npm run watch & code --extensionDevelopmentPath=${PWD}",
     "lint": "eslint src/**/*.ts",
     "package": "vsce package",
     "publish": "vsce publish"
