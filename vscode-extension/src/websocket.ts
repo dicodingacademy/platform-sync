@@ -36,7 +36,6 @@ export class VSCodeWebSocketService implements WebSocketService {
     send(message: SyncMessage): void {
         if (this.ws && this.connected) {
             try {
-                // For compatibility with the IntelliJ plugin, we need to format the message as a string
                 // Format: "reviewerUsername===username;key===value"
                 let messageString = '';
                 
@@ -45,7 +44,6 @@ export class VSCodeWebSocketService implements WebSocketService {
                 } else if (message.type === 'line') {
                     messageString = `reviewerUsername===${message.data.username};line===${message.data.line}`;
                 } else {
-                    // Fallback to JSON for other message types
                     messageString = JSON.stringify(message);
                 }
                 
@@ -97,7 +95,6 @@ export class VSCodeWebSocketService implements WebSocketService {
 
         this.ws.on('message', (data: WebSocket.Data) => {
             try {
-                // Try to parse as JSON first
                 let message: any;
                 const dataString = data.toString();
 
@@ -105,7 +102,6 @@ export class VSCodeWebSocketService implements WebSocketService {
                     // Format: key===value;key2===value2
                     message = this.parseFormattedMessage(dataString);
                 } else {
-                    // Standard JSON
                     message = JSON.parse(dataString);
                 }
 
@@ -127,9 +123,6 @@ export class VSCodeWebSocketService implements WebSocketService {
         });
     }
 
-    /**
-     * Parse message in the format: key===value;key2===value2
-     */
     private parseFormattedMessage(messageString: string): any {
         const result: any = {};
         const parts = messageString.split(';');
