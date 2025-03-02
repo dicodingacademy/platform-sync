@@ -7,23 +7,29 @@ export class VSCodeWebSocketService implements WebSocketService {
     private reconnectAttempts = 0;
     private eventListeners: Record<string, ((data: any) => void)[]> = {};
     private username: string | null = null;
+    private intentionalDisconnect = false;
 
     constructor(private config: ConnectionConfig) {}
 
     connect(): void {
         if (this.connected) return;
 
+        this.intentionalDisconnect = false;
+        
         try {
             this.ws = new WebSocket(this.config.url);
             this.setupWebSocketHandlers();
         } catch (error) {
             console.error('Failed to create WebSocket connection:', error);
-            this.handleReconnect();
+            if (!this.intentionalDisconnect) {
+                this.handleReconnect();
+            }
         }
     }
 
     disconnect(): void {
         if (this.ws) {
+            this.intentionalDisconnect = true;
             this.ws.close();
             this.ws = null;
             this.connected = false;
@@ -91,7 +97,9 @@ export class VSCodeWebSocketService implements WebSocketService {
         this.ws.on('close', () => {
             this.connected = false;
             this.emit('disconnected');
-            this.handleReconnect();
+            if (!this.intentionalDisconnect) {
+                this.handleReconnect();
+            }
         });
 
         this.ws.on('error', (error: Error) => {
