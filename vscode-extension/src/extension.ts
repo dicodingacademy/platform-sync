@@ -173,11 +173,9 @@ function processFileChange(editor: vscode.TextEditor, context: vscode.ExtensionC
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders && workspaceFolders.length > 0) {
         const workspaceFolder = workspaceFolders[0];
-        relativePath = filePath.replace(workspaceFolder.uri.fsPath, '');
+        relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
         
-        const baseProjectPath = path.basename(workspaceFolder.uri.fsPath);
-        
-        const newPath = relativePath.replace(/[/\\]/g, '::');
+        const newPath = path.join(workspaceFolder.name, relativePath).replace(/[/\\]/g, '::');
         if (newPath !== recentPath) {
             recentPath = newPath;
             sendPathMessage(username, newPath);
