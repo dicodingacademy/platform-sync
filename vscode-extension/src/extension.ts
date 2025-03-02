@@ -1,18 +1,14 @@
 import * as vscode from 'vscode';
 import { VSCodeWebSocketService } from './websocket';
-import { ConnectionConfig, ConnectionStatus, SyncMessage } from './types';
+import { ConnectionConfig, ConnectionStatus } from './types';
 import * as path from 'path';
 
-// Track if extension is activated
-let isExtensionActive = false;
 let statusBarItem: vscode.StatusBarItem;
 let webSocketService: VSCodeWebSocketService;
 let recentLine = -1;
 let recentPath = '';
 
-
 export function activate(context: vscode.ExtensionContext) {
-    isExtensionActive = true;
     console.log('Platform Sync Extension Activated');
 
     try {
@@ -50,20 +46,12 @@ export function activate(context: vscode.ExtensionContext) {
         statusBarItem.show();
 
         registerCommands(context);
-        
         setupFileDetection(context);
         
         if (username) {
             webSocketService.connect();
         } else {
-            vscode.window.showInformationMessage(
-                'Platform Sync: Please set your reviewer username',
-                'Set Username'
-            ).then(selection => {
-                if (selection === 'Set Username') {
-                    vscode.commands.executeCommand('platform-sync.setUsername');
-                }
-            });
+            promptSetUsername();
         }
     } catch (error) {
         console.error('Failed to activate Platform Sync extension:', error);
@@ -72,94 +60,87 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function registerCommands(context: vscode.ExtensionContext) {
-    const showInfoCommand = vscode.commands.registerCommand('platform-sync.showInfo', () => {
-        const username = context.globalState.get<string>('platform-sync.username') || 'Not set';
-        const connectionStatus = webSocketService.isConnected() ? 'Connected' : 'Disconnected';
-        vscode.window.showInformationMessage(`Platform Sync: Username: ${username}, Status: ${connectionStatus}`);
-    });
-    context.subscriptions.push(showInfoCommand);
-    
-    const setUsernameCommand = vscode.commands.registerCommand('platform-sync.setUsername', async () => {
-        const username = await vscode.window.showInputBox({
-            prompt: 'Enter your reviewer username',
-            placeHolder: 'username',
-            value: context.globalState.get<string>('platform-sync.username') || ''
-        });
+    context.subscriptions.push(
+        vscode.commands.registerCommand('platform-sync.showInfo', () => {
+            const username = context.globalState.get<string>('platform-sync.username') || 'Not set';
+            const connectionStatus = webSocketService.isConnected() ? 'Connected' : 'Disconnected';
+            vscode.window.showInformationMessage(`Platform Sync: Username: ${username}, Status: ${connectionStatus}`);
+        }),
+        
+        vscode.commands.registerCommand('platform-sync.setUsername', async () => {
+            const username = await vscode.window.showInputBox({
+                prompt: 'Enter your reviewer username',
+                placeHolder: 'username',
+                value: context.globalState.get<string>('platform-sync.username') || ''
+            });
 
-        if (username) {
-            await context.globalState.update('platform-sync.username', username);
-            webSocketService.setUsername(username);
-            vscode.window.showInformationMessage(`Username set to: ${username}`);
-            updateStatusBar(context, webSocketService.isConnected() ? 
-                ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED);
-            
-            if (!webSocketService.isConnected()) {
+            if (username) {
+                await context.globalState.update('platform-sync.username', username);
+                webSocketService.setUsername(username);
+                vscode.window.showInformationMessage(`Username set to: ${username}`);
+                updateStatusBar(context, webSocketService.isConnected() ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED);
+                
+                if (!webSocketService.isConnected()) {
+                    webSocketService.connect();
+                }
+            }
+        }),
+        
+        vscode.commands.registerCommand('platform-sync.toggleConnection', () => {
+            if (webSocketService.isConnected()) {
+                webSocketService.disconnect();
+                vscode.window.showInformationMessage('Platform Sync: Disconnected from server');
+            } else {
+                if (!context.globalState.get<string>('platform-sync.username')) {
+                    vscode.window.showWarningMessage('Platform Sync: Please set your username first');
+                    vscode.commands.executeCommand('platform-sync.setUsername');
+                    return;
+                }
                 webSocketService.connect();
             }
-        }
-    });
-    context.subscriptions.push(setUsernameCommand);
-    
-    const toggleConnectionCommand = vscode.commands.registerCommand('platform-sync.toggleConnection', () => {
-        if (webSocketService.isConnected()) {
-            webSocketService.disconnect();
-            vscode.window.showInformationMessage('Platform Sync: Disconnected from server');
-        } else {
-            if (!context.globalState.get<string>('platform-sync.username')) {
-                vscode.window.showWarningMessage('Platform Sync: Please set your username first');
-                vscode.commands.executeCommand('platform-sync.setUsername');
-                return;
-            }
+        }),
+        
+        vscode.commands.registerCommand('platform-sync.showMenu', async () => {
+            const isConnected = webSocketService.isConnected();
+            const items = [
+                { label: 'Set Username', description: 'Set your reviewer username' },
+                { label: isConnected ? 'Disconnect' : 'Connect', description: isConnected ? 'Disconnect from sync server' : 'Connect to sync server' }
+            ];
             
-            webSocketService.connect();
-        }
-    });
-    context.subscriptions.push(toggleConnectionCommand);
-    
-    const showMenuCommand = vscode.commands.registerCommand('platform-sync.showMenu', async () => {
-        const isConnected = webSocketService.isConnected();
-        const items = [
-            { label: 'Set Username', description: 'Set your reviewer username' },
-            { label: isConnected ? 'Disconnect' : 'Connect', description: isConnected ? 'Disconnect from sync server' : 'Connect to sync server' }
-        ];
-        
-        const selection = await vscode.window.showQuickPick(items, {
-            placeHolder: 'Platform Sync Menu'
-        });
-        
-        if (selection) {
-            switch (selection.label) {
-                case 'Set Username':
-                    vscode.commands.executeCommand('platform-sync.setUsername');
-                    break;
-                case 'Connect':
-                case 'Disconnect':
-                    vscode.commands.executeCommand('platform-sync.toggleConnection');
-                    break;
+            const selection = await vscode.window.showQuickPick(items, { placeHolder: 'Platform Sync Menu' });
+            
+            if (selection) {
+                switch (selection.label) {
+                    case 'Set Username':
+                        vscode.commands.executeCommand('platform-sync.setUsername');
+                        break;
+                    case 'Connect':
+                    case 'Disconnect':
+                        vscode.commands.executeCommand('platform-sync.toggleConnection');
+                        break;
+                }
             }
-        }
-    });
-    context.subscriptions.push(showMenuCommand);
+        })
+    );
 }
 
 function setupFileDetection(context: vscode.ExtensionContext) {
-    const activeEditorListener = vscode.window.onDidChangeActiveTextEditor(editor => {
-        if (editor) {
-            processFileChange(editor, context);
-        }
-    });
-    context.subscriptions.push(activeEditorListener);
-    
-    const cursorPositionListener = vscode.window.onDidChangeTextEditorSelection(event => {
-        processCursorChange(event, context);
-    });
-    context.subscriptions.push(cursorPositionListener);
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor) {
+                processFileChange(editor, context);
+            }
+        }),
+        
+        vscode.window.onDidChangeTextEditorSelection(event => {
+            processCursorChange(event, context);
+        })
+    );
     
     if (vscode.window.activeTextEditor) {
         processFileChange(vscode.window.activeTextEditor, context);
     }
 }
-
 
 function processFileChange(editor: vscode.TextEditor, context: vscode.ExtensionContext) {
     if (!webSocketService.isConnected()) return;
@@ -199,14 +180,9 @@ function processCursorChange(event: vscode.TextEditorSelectionChangeEvent, conte
 function sendPathMessage(username: string, path: string) {
     if (!webSocketService.isConnected()) return;
     
-    const message = `reviewerUsername===${username};path===${path}`;
     webSocketService.send({
         type: 'path',
-        data: {
-            username,
-            filePath: path,
-            line: -1
-        },
+        data: { username, filePath: path, line: -1 },
         timestamp: new Date().toISOString()
     });
 }
@@ -214,14 +190,9 @@ function sendPathMessage(username: string, path: string) {
 function sendLineMessage(username: string, line: number) {
     if (!webSocketService.isConnected()) return;
     
-    const message = `reviewerUsername===${username};line===${line}`;
     webSocketService.send({
         type: 'line',
-        data: {
-            username,
-            filePath: '',
-            line
-        },
+        data: { username, filePath: '', line },
         timestamp: new Date().toISOString()
     });
 }
@@ -247,6 +218,17 @@ function updateStatusBar(context: vscode.ExtensionContext, status: ConnectionSta
     }
 }
 
+function promptSetUsername() {
+    vscode.window.showInformationMessage(
+        'Platform Sync: Please set your reviewer username',
+        'Set Username'
+    ).then(selection => {
+        if (selection === 'Set Username') {
+            vscode.commands.executeCommand('platform-sync.setUsername');
+        }
+    });
+}
+
 export function deactivate() {
     console.log('Platform Sync Extension Deactivated');
     if (webSocketService) {
@@ -256,6 +238,4 @@ export function deactivate() {
     if (statusBarItem) {
         statusBarItem.dispose();
     }
-    
-    isExtensionActive = false;
 }

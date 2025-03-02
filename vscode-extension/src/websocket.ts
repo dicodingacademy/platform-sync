@@ -5,15 +5,13 @@ export class VSCodeWebSocketService implements WebSocketService {
     private ws: WebSocket | null = null;
     private connected = false;
     private reconnectAttempts = 0;
-    private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
+    private eventListeners: Record<string, ((data: any) => void)[]> = {};
     private username: string | null = null;
 
     constructor(private config: ConnectionConfig) {}
 
     connect(): void {
-        if (this.connected) {
-            return;
-        }
+        if (this.connected) return;
 
         try {
             this.ws = new WebSocket(this.config.url);
@@ -36,17 +34,7 @@ export class VSCodeWebSocketService implements WebSocketService {
     send(message: SyncMessage): void {
         if (this.ws && this.connected) {
             try {
-                // Format: "reviewerUsername===username;key===value"
-                let messageString = '';
-                
-                if (message.type === 'path') {
-                    messageString = `reviewerUsername===${message.data.username};path===${message.data.filePath}`;
-                } else if (message.type === 'line') {
-                    messageString = `reviewerUsername===${message.data.username};line===${message.data.line}`;
-                } else {
-                    messageString = JSON.stringify(message);
-                }
-                
+                const messageString = this.formatMessage(message);
                 this.ws.send(messageString);
             } catch (error) {
                 console.error('Failed to send message:', error);
@@ -83,10 +71,8 @@ export class VSCodeWebSocketService implements WebSocketService {
     }
 
     private setupWebSocketHandlers(): void {
-        if (!this.ws) {
-            return;
-        }
-        
+        if (!this.ws) return;
+
         this.ws.on('open', () => {
             this.connected = true;
             this.reconnectAttempts = 0;
@@ -95,16 +81,7 @@ export class VSCodeWebSocketService implements WebSocketService {
 
         this.ws.on('message', (data: WebSocket.Data) => {
             try {
-                let message: any;
-                const dataString = data.toString();
-
-                if (dataString.includes('===')) {
-                    // Format: key===value;key2===value2
-                    message = this.parseFormattedMessage(dataString);
-                } else {
-                    message = JSON.parse(dataString);
-                }
-
+                const message = this.parseMessage(data.toString());
                 this.emit('message', message);
             } catch (error) {
                 console.error('Failed to parse message:', error);
@@ -123,18 +100,30 @@ export class VSCodeWebSocketService implements WebSocketService {
         });
     }
 
-    private parseFormattedMessage(messageString: string): any {
-        const result: any = {};
-        const parts = messageString.split(';');
-        
-        for (const part of parts) {
-            if (part.includes('===')) {
-                const [key, value] = part.split('===');
-                result[key] = value;
-            }
+    private formatMessage(message: SyncMessage): string {
+        if (message.type === 'path') {
+            return `reviewerUsername===${message.data.username};path===${message.data.filePath}`;
+        } else if (message.type === 'line') {
+            return `reviewerUsername===${message.data.username};line===${message.data.line}`;
+        } else {
+            return JSON.stringify(message);
         }
-        
-        return result;
+    }
+
+    private parseMessage(dataString: string): any {
+        if (dataString.includes('===')) {
+            return this.parseFormattedMessage(dataString);
+        } else {
+            return JSON.parse(dataString);
+        }
+    }
+
+    private parseFormattedMessage(messageString: string): any {
+        return messageString.split(';').reduce((result, part) => {
+            const [key, value] = part.split('===');
+            if (key && value) result[key] = value;
+            return result;
+        }, {} as Record<string, any>);
     }
 
     private handleReconnect(): void {
@@ -147,8 +136,6 @@ export class VSCodeWebSocketService implements WebSocketService {
         this.reconnectAttempts++;
         console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
 
-        setTimeout(() => {
-            this.connect();
-        }, this.config.reconnectInterval);
+        setTimeout(() => this.connect(), this.config.reconnectInterval);
     }
 }

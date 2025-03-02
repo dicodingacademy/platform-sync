@@ -1,5 +1,3 @@
-import WebSocket from 'ws';
-
 export interface SyncMessageData {
   username: string;
   filePath: string;
@@ -8,11 +6,7 @@ export interface SyncMessageData {
 
 export interface SyncMessage {
   type: string;
-  data: {
-    username: string;
-    filePath: string;
-    line: number;
-  };
+  data: SyncMessageData;
   timestamp: string;
 }
 
