@@ -8,8 +8,7 @@
   "scripts": {
     "build": "npm run build:intellij && npm run build:vscode",
     "build:intellij": "./intellij-plugin/gradlew -p intellij-plugin buildPlugin",
-    "build:vscode": "npm run build -w vscode-extension",
-    "package:vscode": "npm run package -w vscode-extension",
+    "build:vscode": "npm run package -w vscode-extension",
     "dev:vscode": "npm run dev -w vscode-extension",
     "dev:intellij": "./intellij-plugin/gradlew -p intellij-plugin runIde",
     "lint": "npm run lint -w vscode-extension",

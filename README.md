@@ -126,7 +126,7 @@ The packaged extension will be available as a `.vsix` file in the `vscode-extens
 - `npm run build` - Build both plugins
 - `npm run build:intellij` - Build IntelliJ plugin only
 - `npm run build:vscode` - Build VS Code extension only
-- `npm run package:vscode` - Package VS Code extension
 - `npm run dev:vscode` - Start VS Code extension in development mode
+- `npm run dev:intellij` - Start IntelliJ plugin in development mode
 - `npm run lint` - Run linting
 - `npm run clean` - Clean build artifacts
