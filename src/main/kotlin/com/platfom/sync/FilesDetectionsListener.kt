@@ -7,51 +7,38 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.vfs.VirtualFile
-import org.java_websocket.client.WebSocketClient
-import org.java_websocket.handshake.ServerHandshake
+import com.platfom.sync.service.PlatformSyncService
+import com.platfom.sync.service.WebSocketService
 import java.io.File
-import java.net.URI
 
 class FilesDetectionsListener : FileEditorManagerListener {
-    private val socks = WebSocks(URI("ws://localhost:8123/platform"))
-    private val editorEventMulticasts = EditorFactory.getInstance().eventMulticaster
+    private val platformSyncService = PlatformSyncService.getInstance()
+    private val webSocketService = WebSocketService.getInstance()
+    private val editorEventMulticaster = EditorFactory.getInstance().eventMulticaster
     private var recentLine = -1
     private var recentPath = ""
 
     init {
-        socks.connect()
+        webSocketService.connect()
     }
 
     private val mouseEditorObserver = object : EditorMouseListener {
         override fun mouseClicked(event: EditorMouseEvent) {
-            super.mouseClicked(event)
-
-            val newLinePosition = event.editor.caretModel.currentCaret.logicalPosition.line + 1
-
-            if (socks.isOpen) {
-                if (newLinePosition != recentLine) {
-                    recentLine = newLinePosition
-                    socks.send("line===${recentLine}")
+            val logicalPosition = event.editor.caretModel.logicalPosition.line + 1
+            if (logicalPosition != recentLine) {
+                recentLine = logicalPosition
+                if (webSocketService.isConnected()) {
+                    webSocketService.sendMessage("reviewerUsername===${platformSyncService.getReviewerUsername()};line===$recentLine")
                 }
             }
         }
     }
 
-    override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
-        super.fileClosed(source, file)
-        editorEventMulticasts.removeEditorMouseListener(mouseEditorObserver)
-    }
+    override fun selectionChanged(event: FileEditorManagerEvent) {
+        val source = event.manager
+        val file = event.newFile ?: return
 
-    override fun selectionChanged(editorEvent: FileEditorManagerEvent) {
-        super.selectionChanged(editorEvent)
-        editorEvent.newFile?.let {
-            process(editorEvent.manager, it)
-        }
-    }
-
-    override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
-        super.fileOpened(source, file)
-        editorEventMulticasts.addEditorMouseListener(mouseEditorObserver)
+        editorEventMulticaster.addEditorMouseListener(mouseEditorObserver)
         process(source, file)
     }
 
@@ -61,30 +48,12 @@ class FilesDetectionsListener : FileEditorManagerListener {
         val projectLocation = fullPath.split(baseProjectPath)[0]
         val filePath = fullPath.replace(projectLocation, "")
 
-        if (socks.isOpen) {
+        if (webSocketService.isConnected()) {
             val newPath = filePath.replace("[/\\\\]".toRegex(), "::")
             if (newPath != recentPath) {
                 recentPath = newPath
-                socks.send("path===${recentPath}")
+                webSocketService.sendMessage("reviewerUsername===${platformSyncService.getReviewerUsername()};path===${recentPath}")
             }
-        }
-    }
-
-    class WebSocks(uri: URI) : WebSocketClient(uri) {
-        override fun onOpen(handshakedata: ServerHandshake?) {
-            println("connected, ready to observe")
-        }
-
-        override fun onMessage(message: String?) {
-            println("incomming $message")
-        }
-
-        override fun onClose(code: Int, reason: String?, remote: Boolean) {
-            println("connection close")
-        }
-
-        override fun onError(ex: Exception?) {
-            println("connection error")
         }
     }
 }

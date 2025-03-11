@@ -11,7 +11,29 @@
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
 
-    <extensions defaultExtensionNs="com.intellij" />
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.platfom.sync.service.PlatformSyncService"/>
+        <statusBarWidgetFactory id="PlatformSync" 
+                              implementation="com.platfom.sync.widget.PlatformSyncStatusBarWidgetFactory"
+                              order="after Position"/>
+        <notificationGroup id="Platform Sync Notification"
+                         displayType="BALLOON"
+                         key="platform.sync.notification"/>
+    </extensions>
+
+    <actions>
+        <action id="com.platfom.sync.action.ReviewerUsernameInputAction"
+                class="com.platfom.sync.action.ReviewerUsernameInputAction"
+                text="Input Reviwer Username"
+                description="Open a dialog to input username">
+        </action>
+
+        <action id="com.platfom.sync.action.PlatformSyncStatusAction"
+                class="com.platfom.sync.action.PlatformSyncStatusAction"
+                text="Platform Sync Status"
+                description="Status of platform sync">
+        </action>
+    </actions>
 
     <change-notes><![CDATA[
         <strong>0.5.5</strong>
