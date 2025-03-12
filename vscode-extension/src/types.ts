@@ -12,6 +12,7 @@ export interface SyncMessage {
 
 export enum ConnectionStatus {
   CONNECTED = 'CONNECTED',
+  CONNECTING = 'CONNECTING',
   DISCONNECTED = 'DISCONNECTED',
   FAILED_TO_CONNECT = 'FAILED_TO_CONNECT'
 }
@@ -27,6 +28,8 @@ export interface WebSocketService {
   disconnect(): void;
   send(message: SyncMessage): void;
   isConnected(): boolean;
+  setUsername(username: string): void;
+  setWebSocketUrl(url: string): void;
   on(event: 'message', callback: (data: SyncMessage) => void): void;
   on(event: 'connected' | 'disconnected', callback: () => void): void;
   on(event: 'error', callback: (error: Error) => void): void;

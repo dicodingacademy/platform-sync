@@ -36,6 +36,10 @@
       {
         "command": "platform-sync.showMenu",
         "title": "Platform Sync: Show Menu"
+      },
+      {
+        "command": "platform-sync.setWebSocketUrl",
+        "title": "Platform Sync: Set WebSocket URL"
       }
     ],
     "configuration": {

@@ -12,8 +12,9 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Platform Sync Extension Activated');
 
     try {
+        const savedUrl = context.globalState.get<string>('platform-sync.websocketUrl') || '';
         const config: ConnectionConfig = {
-            url: 'wss://platform-sync-websocket.onrender.com',
+            url: savedUrl,
             reconnectInterval: 5000,
             maxReconnectAttempts: 5
         };
@@ -104,6 +105,7 @@ function registerCommands(context: vscode.ExtensionContext) {
             const isConnected = webSocketService.isConnected();
             const items = [
                 { label: 'Set Username', description: 'Set your reviewer username' },
+                { label: 'Set WebSocket URL', description: 'Configure WebSocket server URL' },
                 { label: isConnected ? 'Disconnect' : 'Connect', description: isConnected ? 'Disconnect from sync server' : 'Connect to sync server' }
             ];
             
@@ -114,10 +116,36 @@ function registerCommands(context: vscode.ExtensionContext) {
                     case 'Set Username':
                         vscode.commands.executeCommand('platform-sync.setUsername');
                         break;
+                    case 'Set WebSocket URL':
+                        vscode.commands.executeCommand('platform-sync.setWebSocketUrl');
+                        break;
                     case 'Connect':
                     case 'Disconnect':
                         vscode.commands.executeCommand('platform-sync.toggleConnection');
                         break;
+                }
+            }
+        }),
+
+        vscode.commands.registerCommand('platform-sync.setWebSocketUrl', async () => {
+            const currentUrl = context.globalState.get<string>('platform-sync.websocketUrl') || 'wss://platform-sync-websocket.onrender.com';
+            const url = await vscode.window.showInputBox({
+                prompt: 'Enter WebSocket URL',
+                placeHolder: 'wss://your-websocket-url',
+                value: currentUrl
+            });
+
+            if (url) {
+                await context.globalState.update('platform-sync.websocketUrl', url);
+                webSocketService.setWebSocketUrl(url);
+                vscode.window.showInformationMessage(`WebSocket URL set to: ${url}`);
+                updateStatusBar(context, webSocketService.isConnected() ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED);
+                
+                if (webSocketService.isConnected()) {
+                    webSocketService.disconnect();
+                }
+                if (context.globalState.get<string>('platform-sync.username')) {
+                    webSocketService.connect();
                 }
             }
         })
@@ -201,19 +229,24 @@ function updateStatusBar(context: vscode.ExtensionContext, status: ConnectionSta
     if (!statusBarItem) return;
     
     const username = context.globalState.get<string>('platform-sync.username') || 'Not set';
+    const url = context.globalState.get<string>('platform-sync.websocketUrl') || 'Default URL';
     
     switch (status) {
+        case ConnectionStatus.CONNECTING:
+            statusBarItem.text = `$(loading~spin) Platform Sync (${username})`;
+            statusBarItem.tooltip = `Platform Sync: Connecting...\nURL: ${url}`;
+            break;
         case ConnectionStatus.CONNECTED:
             statusBarItem.text = `$(sync) Platform Sync (${username})`;
-            statusBarItem.tooltip = 'Platform Sync: Connected';
+            statusBarItem.tooltip = `Platform Sync: Connected\nURL: ${url}`;
             break;
         case ConnectionStatus.DISCONNECTED:
             statusBarItem.text = `$(sync-ignored) Platform Sync (${username})`;
-            statusBarItem.tooltip = 'Platform Sync: Disconnected';
+            statusBarItem.tooltip = `Platform Sync: Disconnected\nURL: ${url}`;
             break;
         case ConnectionStatus.FAILED_TO_CONNECT:
             statusBarItem.text = `$(error) Platform Sync (${username})`;
-            statusBarItem.tooltip = 'Platform Sync: Failed to connect';
+            statusBarItem.tooltip = `Platform Sync: Failed to connect\nURL: ${url}`;
             break;
     }
 }
