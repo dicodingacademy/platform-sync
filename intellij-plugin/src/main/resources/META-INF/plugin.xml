@@ -28,6 +28,12 @@
                 description="Open a dialog to input username">
         </action>
 
+        <action id="com.platfom.sync.action.WebSocketUrlInputAction"
+                class="com.platfom.sync.action.WebSocketUrlInputAction"
+                text="Input WebSocket URL"
+                description="Open a dialog to input WebSocket URL">
+        </action>
+
         <action id="com.platfom.sync.action.PlatformSyncStatusAction"
                 class="com.platfom.sync.action.PlatformSyncStatusAction"
                 text="Platform Sync Status"
