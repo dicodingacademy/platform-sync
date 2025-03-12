@@ -12,6 +12,7 @@ import com.platfom.sync.action.ReviewerUsernameInputAction
 import com.platfom.sync.action.WebSocketUrlInputAction
 import com.platfom.sync.service.PlatformSyncService
 import com.platfom.sync.service.WebSocketService
+import com.platfom.sync.service.PlatformSyncStatus
 
 class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project),
     StatusBarWidget.MultipleTextValuesPresentation {
@@ -30,7 +31,11 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
         val service = PlatformSyncService.getInstance()
         val username = service.getReviewerUsername()?.let { "($it)" } ?: "(Not Set)"
         val status = service.getPlatformSyncStatus()
-        return "Platform Sync $username | ${status.description}"
+        
+        return when (status) {
+            PlatformSyncStatus.CONNECTING -> "Platform Sync $username | ${status.description} ⟳"
+            else -> "Platform Sync $username | ${status.description}"
+        }
     }
 
     override fun getPopup(): ListPopup {

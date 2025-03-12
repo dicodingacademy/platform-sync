@@ -64,6 +64,7 @@ class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> 
 
 enum class PlatformSyncStatus(val description: String) {
     CONNECTED("Connected"),
+    CONNECTING("Connecting..."),
     DISCONNECTED("Disconnected"),
     FAILED_TO_CONNECT("Failed to Connect")
 }

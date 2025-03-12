@@ -24,10 +24,8 @@ class WebSocketUrlInputAction : AnAction("WebSocket URL Input") {
 
         if (!input.isNullOrEmpty()) {
             service.saveWebSocketUrl(input)
-            if (webSocketService.isConnected()) {
-                webSocketService.disconnect()
-                webSocketService.connect()
-            }
+            webSocketService.disconnect()
+            webSocketService.connect()
         }
     }
 

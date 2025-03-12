@@ -23,6 +23,7 @@ class WebSocketService {
         
         disconnect()
         try {
+            platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.CONNECTING)
             webSocketClient = WebSocks(platformSyncService, URI(platformSyncService.getWebSocketUrl())).apply {
                 connect()
             }
@@ -34,6 +35,7 @@ class WebSocketService {
                 "Failed to connect to ${platformSyncService.getWebSocketUrl()}: ${e.message}", 
                 NotificationType.ERROR
             )
+            platformSyncService.savePlatformSyncStatus(PlatformSyncStatus.FAILED_TO_CONNECT)
             return false
         }
     }
