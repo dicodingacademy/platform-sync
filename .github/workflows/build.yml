@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # Set up Java for IntelliJ plugin
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Set up Node.js for VS Code extension
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    # Install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Build both plugins
+    - name: Build
+      run: npm run build
+
+    # Package VS Code extension
+    - name: Package VS Code extension
+      run: npm run package:vscode
+
+    # Upload IntelliJ plugin artifact
+    - name: Upload IntelliJ Plugin
+      uses: actions/upload-artifact@v3
+      with:
+        name: intellij-plugin
+        path: intellij-plugin/build/distributions/*.zip
+
+    # Upload VS Code extension artifact
+    - name: Upload VS Code Extension
+      uses: actions/upload-artifact@v3
+      with:
+        name: vscode-extension
+        path: vscode-extension/*.vsix
+
+    # Upload IntelliJ plugin to S3 (only on tag)
+    - name: Upload IntelliJ Plugin to S3
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: shallwefootball/s3-upload-action@master
+      with:
+        aws_key_id: ${{ secrets.STORAGE_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET }}
+        aws_bucket: ${{ secrets.TOOLS_BUCKET }}
+        source_dir: 'intellij-plugin/build/distributions'
+        endpoint: 'https://s3.nevaobjects.id'
+
+    # Upload VS Code extension to S3 (only on tag)
+    - name: Upload VS Code Extension to S3
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: shallwefootball/s3-upload-action@master
+      with:
+        aws_key_id: ${{ secrets.STORAGE_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET }}
+        aws_bucket: ${{ secrets.TOOLS_BUCKET }}
+        source_dir: 'vscode-extension'
+        endpoint: 'https://s3.nevaobjects.id'
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    # Download artifacts
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+
+    # Create GitHub Release
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          intellij-plugin/*.zip
+          vscode-extension/*.vsix
+        name: "Release ${{ github.ref_name }}"
+        tag_name: ${{ github.ref_name }}
+        body: |
+          Platform Sync Release ${{ github.ref_name }}
+          
+          This release includes both IntelliJ IDEA plugin and VS Code extension.
+        draft: false
+        prerelease: false

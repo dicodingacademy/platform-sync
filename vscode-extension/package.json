@@ -1,0 +1,74 @@
+{
+  "name": "platform-sync-vscode",
+  "displayName": "Platform Sync",
+  "description": "Cross-platform code review synchronization tool for VS Code and IntelliJ IDEA",
+  "version": "0.0.3",
+  "publisher": "dicodingacademy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicodingacademy/platform-sync.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "platform-sync.setUsername",
+        "title": "Platform Sync: Set Reviewer Username"
+      },
+      {
+        "command": "platform-sync.showInfo",
+        "title": "Platform Sync: Show Information"
+      },
+      {
+        "command": "platform-sync.toggleConnection",
+        "title": "Platform Sync: Toggle Connection"
+      },
+      {
+        "command": "platform-sync.showMenu",
+        "title": "Platform Sync: Show Menu"
+      }
+    ],
+    "configuration": {
+      "title": "Platform Sync",
+      "properties": {
+        "platformSync.username": {
+          "type": "string",
+          "default": "",
+          "description": "Reviewer username for platform sync"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "dev": "npm run watch & code --extensionDevelopmentPath=${PWD}",
+    "lint": "eslint src/**/*.ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.86",
+    "@types/vscode": "^1.85.0",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3",
+    "@vscode/vsce": "^2.24.0"
+  }
+}
