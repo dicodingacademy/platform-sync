@@ -18,7 +18,7 @@ export enum ConnectionStatus {
 }
 
 export interface ConnectionConfig {
-  url: string;
+  url?: string;
   reconnectInterval: number;
   maxReconnectAttempts: number;
 }

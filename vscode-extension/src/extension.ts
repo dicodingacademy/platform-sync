@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('Platform Sync Extension Activated');
 
     try {
-        const savedUrl = context.globalState.get<string>('platform-sync.websocketUrl') || '';
+        const savedUrl = context.globalState.get<string>('platform-sync.websocketUrl');
         const config: ConnectionConfig = {
             url: savedUrl,
             reconnectInterval: 5000,
