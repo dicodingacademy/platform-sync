@@ -53,7 +53,6 @@ npm run build
 # Or build specific components
 npm run build:intellij  # Build IntelliJ plugin only
 npm run build:vscode    # Build VS Code extension only
-npm run package:vscode  # Package VS Code extension
 ```
 
 ## IntelliJ Plugin

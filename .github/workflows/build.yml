@@ -40,7 +40,7 @@ jobs:
 
     # Package VS Code extension
     - name: Package VS Code extension
-      run: npm run package:vscode
+      run: npm run build:vscode
 
     # Upload IntelliJ plugin artifact
     - name: Upload IntelliJ Plugin
