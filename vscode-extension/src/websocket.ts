@@ -12,9 +12,10 @@ export class VSCodeWebSocketService implements WebSocketService {
     constructor(private config: ConnectionConfig) {}
 
     connect(): void {
-        if (this.connected) return;
+        if (this.connected || !this.config.url) return;
 
         this.intentionalDisconnect = false;
+        this.emit('connecting');
         
         try {
             this.ws = new WebSocket(this.config.url);
@@ -54,6 +55,11 @@ export class VSCodeWebSocketService implements WebSocketService {
 
     setUsername(username: string): void {
         this.username = username;
+    }
+
+    setWebSocketUrl(url: string): void {
+        this.config.url = url;
+        this.reconnectAttempts = 0;
     }
 
     on(event: string, callback: (data: any) => void): void {
@@ -105,6 +111,9 @@ export class VSCodeWebSocketService implements WebSocketService {
         this.ws.on('error', (error: Error) => {
             console.error('WebSocket error:', error);
             this.emit('error', error);
+            if (!this.intentionalDisconnect) {
+                this.handleReconnect();
+            }
         });
     }
 

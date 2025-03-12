@@ -93,10 +93,10 @@ Follow the guide for setting up the SDK at [Setting Up Environment](https://plug
 
 ```bash
 npm run build:vscode   # Build the extension
-npm run package:vscode # Create VSIX package
+npm run build:vscode # Create VSIX package
 ```
 
-The packaged extension will be available as a `.vsix` file in the `vscode-extension` directory.
+The packaged extension will be available as a `.vsix` file in the `vscode-extension/dist` directory.
 
 ### Installation
 

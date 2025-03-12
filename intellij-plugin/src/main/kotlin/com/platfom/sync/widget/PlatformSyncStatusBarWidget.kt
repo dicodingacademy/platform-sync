@@ -9,8 +9,10 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.impl.status.EditorBasedWidget
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.platfom.sync.action.ReviewerUsernameInputAction
+import com.platfom.sync.action.WebSocketUrlInputAction
 import com.platfom.sync.service.PlatformSyncService
 import com.platfom.sync.service.WebSocketService
+import com.platfom.sync.service.PlatformSyncStatus
 
 class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project),
     StatusBarWidget.MultipleTextValuesPresentation {
@@ -21,19 +23,27 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
         val service = PlatformSyncService.getInstance()
         val username = service.getReviewerUsername() ?: "Not Set"
         val status = service.getPlatformSyncStatus()
-        return "Platform Sync | Reviewer: $username | Status: ${status.description}"
+        val url = service.getWebSocketUrl()
+        return "Platform Sync | Reviewer: $username | URL: $url | Status: ${status.description}"
     }
 
     override fun getSelectedValue(): String {
         val service = PlatformSyncService.getInstance()
         val username = service.getReviewerUsername()?.let { "($it)" } ?: "(Not Set)"
         val status = service.getPlatformSyncStatus()
-        return "Platform Sync $username | ${status.description}"
+        
+        return when (status) {
+            PlatformSyncStatus.CONNECTING -> "Platform Sync $username | ${status.description} ⟳"
+            else -> "Platform Sync $username | ${status.description}"
+        }
     }
 
     override fun getPopup(): ListPopup {
         val isConnected = webSocketService.isConnected()
-        val menuItems = mutableListOf(MenuItem("Set Username", true))
+        val menuItems = mutableListOf(
+            MenuItem("Set Username", true),
+            MenuItem("Set WebSocket URL", true)
+        )
         menuItems.add(MenuItem(if (isConnected) "Disconnect" else "Reconnect", true))
 
         val step = object : BaseListPopupStep<MenuItem>("Platform Sync Actions", menuItems) {
@@ -52,7 +62,16 @@ class PlatformSyncStatusBarWidget(project: Project) : EditorBasedWidget(project)
                                 )
                             )
                         }
-
+                        "Set WebSocket URL" -> {
+                            WebSocketUrlInputAction().actionPerformed(
+                                com.intellij.openapi.actionSystem.AnActionEvent.createFromAnAction(
+                                    WebSocketUrlInputAction(),
+                                    null,
+                                    "StatusBarWidget",
+                                    com.intellij.openapi.actionSystem.DataContext.EMPTY_CONTEXT
+                                )
+                            )
+                        }
                         "Disconnect" -> webSocketService.disconnect()
                         "Reconnect" -> webSocketService.connect()
                     }

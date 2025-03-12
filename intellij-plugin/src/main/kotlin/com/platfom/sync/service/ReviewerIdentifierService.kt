@@ -10,7 +10,11 @@ class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> 
 
     private val listeners = mutableListOf<() -> Unit>()
 
-    data class State(var reviewerUserName: String? = null, var platformSyncStatus: PlatformSyncStatus = PlatformSyncStatus.FAILED_TO_CONNECT)
+    data class State(
+        var reviewerUserName: String? = null, 
+        var platformSyncStatus: PlatformSyncStatus = PlatformSyncStatus.FAILED_TO_CONNECT,
+        var webSocketUrl: String? = null
+    )
 
     private var state = State()
 
@@ -26,6 +30,13 @@ class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> 
     }
 
     fun getReviewerUsername(): String? = state.reviewerUserName
+
+    fun saveWebSocketUrl(url: String) {
+        state.webSocketUrl = url
+        notifyListeners()
+    }
+
+    fun getWebSocketUrl(): String? = state.webSocketUrl
 
     fun savePlatformSyncStatus(status: PlatformSyncStatus) {
         state.platformSyncStatus = status
@@ -53,6 +64,7 @@ class PlatformSyncService : PersistentStateComponent<PlatformSyncService.State> 
 
 enum class PlatformSyncStatus(val description: String) {
     CONNECTED("Connected"),
+    CONNECTING("Connecting..."),
     DISCONNECTED("Disconnected"),
     FAILED_TO_CONNECT("Failed to Connect")
 }
