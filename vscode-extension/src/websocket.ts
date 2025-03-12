@@ -57,8 +57,8 @@ export class VSCodeWebSocketService implements WebSocketService {
         this.username = username;
     }
 
-    setWebSocketUrl(url: string | null): void {
-        this.config.url = url || undefined;
+    setWebSocketUrl(url: string): void {
+        this.config.url = url;
         this.reconnectAttempts = 0;
     }
 
