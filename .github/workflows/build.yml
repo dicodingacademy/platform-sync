@@ -61,7 +61,7 @@ jobs:
         aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET }}
         aws_bucket: ${{ secrets.TOOLS_BUCKET }}
         source_dir: 'intellij-plugin/build/distributions'
-        destination_dir: ${{ github.ref_name }}
+        destination_dir: "platform-sync/${{ github.ref_name }}"
         endpoint: 'https://s3.nevaobjects.id'
 
     # Upload VS Code extension to S3 (only on tag)
@@ -73,7 +73,7 @@ jobs:
         aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET }}
         aws_bucket: ${{ secrets.TOOLS_BUCKET }}
         source_dir: 'vscode-extension/dist'
-        destination_dir: ${{ github.ref_name }}
+        destination_dir: "platform-sync/${{ github.ref_name }}"
         endpoint: 'https://s3.nevaobjects.id'
 
   release:
