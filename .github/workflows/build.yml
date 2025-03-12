@@ -71,7 +71,7 @@ jobs:
         aws_key_id: ${{ secrets.STORAGE_KEY_ID }}
         aws_secret_access_key: ${{ secrets.STORAGE_KEY_SECRET }}
         aws_bucket: ${{ secrets.TOOLS_BUCKET }}
-        source_dir: 'vscode-extension'
+        source_dir: 'vscode-extension/*.vsix'
         endpoint: 'https://s3.nevaobjects.id'
 
   release:
