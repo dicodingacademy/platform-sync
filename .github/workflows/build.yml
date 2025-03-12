@@ -38,10 +38,6 @@ jobs:
     - name: Build
       run: npm run build
 
-    # Package VS Code extension
-    - name: Package VS Code extension
-      run: npm run build:vscode
-
     # Upload IntelliJ plugin artifact
     - name: Upload IntelliJ Plugin
       uses: actions/upload-artifact@v4
