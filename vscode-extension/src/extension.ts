@@ -128,7 +128,7 @@ function registerCommands(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand('platform-sync.setWebSocketUrl', async () => {
-            const currentUrl = context.globalState.get<string>('platform-sync.websocketUrl') || 'wss://platform-sync-websocket.onrender.com';
+            const currentUrl = context.globalState.get<string>('platform-sync.websocketUrl') || '';
             const url = await vscode.window.showInputBox({
                 prompt: 'Enter WebSocket URL',
                 placeHolder: 'wss://your-websocket-url',
