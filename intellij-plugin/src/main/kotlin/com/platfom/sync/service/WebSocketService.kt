@@ -22,11 +22,20 @@ class WebSocketService {
         }
         
         disconnect()
-        webSocketClient = WebSocks(platformSyncService, URI("wss://platform-sync-websocket.onrender.com")).apply {
-            connect()
+        try {
+            webSocketClient = WebSocks(platformSyncService, URI(platformSyncService.getWebSocketUrl())).apply {
+                connect()
+            }
+            notifyListeners()
+            return true
+        } catch (e: Exception) {
+            showNotification(
+                "Connection Error", 
+                "Failed to connect to ${platformSyncService.getWebSocketUrl()}: ${e.message}", 
+                NotificationType.ERROR
+            )
+            return false
         }
-        notifyListeners()
-        return true
     }
     
     private fun showNotification(title: String, content: String, type: NotificationType) {
