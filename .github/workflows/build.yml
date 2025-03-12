@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: self-hoster
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v4
 
