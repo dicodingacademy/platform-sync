@@ -6,8 +6,7 @@ Platform Sync is a code review tool that synchronizes file and cursor positions 
 
 - IntelliJ IDEA 2020.1 or later (build 200+)
 - Android Studio 4.2 or later
-- Supports up to IntelliJ 2024.1 (build 243.\*)
-- Latest Android Studio versions supported (Giraffe, Iguana, Jellyfish)
+- VS Code 1.60.0 or later
 
 ## Project Structure
 
