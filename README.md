@@ -1,6 +1,6 @@
 # Platform Sync
 
-Platform Sync is a code review tool that synchronizes file and cursor positions between IDE (IntelliJ IDEA/Android Studio/VS Code) and Didocing Review Platform.
+Platform Sync is a code review tool that synchronizes file and cursor positions between IDE (IntelliJ IDEA/Android Studio/VS Code) and Dicoding Review Platform.
 
 ## Platform Compatibility
 
