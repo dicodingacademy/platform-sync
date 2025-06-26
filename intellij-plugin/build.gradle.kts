@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.20"
 }
 group = "platform.plugin"
-version = "0.6.1"
+version = "0.6.2"
 
 repositories {
     mavenCentral()
