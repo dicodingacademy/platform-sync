@@ -13,7 +13,7 @@ repositories {
 tasks {
     patchPluginXml {
         sinceBuild.set("200")
-        untilBuild.set("243.*")
+        untilBuild.set("251.*")
     }
 }
 
