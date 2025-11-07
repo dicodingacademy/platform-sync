@@ -13,7 +13,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.platfom.sync.service.PlatformSyncService"/>
-        <statusBarWidgetFactory id="PlatformSync" 
+        <statusBarWidgetFactory id="PlatformSync"
                               implementation="com.platfom.sync.widget.PlatformSyncStatusBarWidgetFactory"
                               order="after Position"/>
         <notificationGroup id="Platform Sync Notification"
@@ -42,6 +42,10 @@
     </actions>
 
     <change-notes><![CDATA[
+        <strong>0.6.3</strong>
+        <ul>
+            <li>Add support to IDE with version up to 252.* </li>
+        </ul>
         <strong>0.6.2</strong>
         <ul>
             <li>Add support to IDE with version up to 251.* </li>
