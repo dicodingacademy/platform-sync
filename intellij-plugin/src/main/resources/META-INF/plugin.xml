@@ -42,6 +42,10 @@
     </actions>
 
     <change-notes><![CDATA[
+        <strong>0.6.4</strong>
+        <ul>
+            <li>Add support to IDE with version up to 253.* </li>
+        </ul>
         <strong>0.6.3</strong>
         <ul>
             <li>Add support to IDE with version up to 252.* </li>
