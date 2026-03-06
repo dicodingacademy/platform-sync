@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.9.20"
 }
 group = "platform.plugin"
-version = "0.6.3"
+version = "0.6.4"
 
 repositories {
     mavenCentral()
@@ -13,7 +13,7 @@ repositories {
 tasks {
     patchPluginXml {
         sinceBuild.set("200")
-        untilBuild.set("252.*")
+        untilBuild.set("253.*")
     }
 }
 
